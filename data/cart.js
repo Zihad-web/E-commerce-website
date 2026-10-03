@@ -1,108 +1,105 @@
 import { products } from "./products.js";
 
+let savedCart = JSON.parse(localStorage.getItem("cart"));
 
+if (!Array.isArray(savedCart)) {
+  savedCart = [];
+}
 
+// Convert old cart format to the new quantity-based format
+const normalizedCart = [];
 
+savedCart.forEach((item) => {
+  // Old format:
+  // { id: "...", name: "...", priceCents: ... }
 
+  if (item.id && !item.productId) {
+    const existingItem = normalizedCart.find((cartItem) => {
+      return cartItem.productId === item.id;
+    });
 
+    if (existingItem) {
+      existingItem.quantity++;
+    } else {
+      normalizedCart.push({
+        productId: item.id,
+        quantity: 1,
+      });
+    }
+  }
 
+  // New format:
+  // { productId: "...", quantity: 2 }
+  else if (item.productId) {
+    const existingItem = normalizedCart.find((cartItem) => {
+      return cartItem.productId === item.productId;
+    });
 
-const cart = [];
+    if (existingItem) {
+      existingItem.quantity += item.quantity;
+    } else {
+      normalizedCart.push({
+        productId: item.productId,
+        quantity: item.quantity,
+      });
+    }
+  }
+});
 
-document.querySelectorAll('.add-to-cart-button').forEach((button) => {
+export const cart = normalizedCart;
 
-  button.addEventListener('click', () => {
+function saveCart() {
+  localStorage.setItem("cart", JSON.stringify(cart));
+}
 
+function getCartQuantity() {
+  return cart.reduce((total, cartItem) => {
+    return total + cartItem.quantity;
+  }, 0);
+}
+
+function updateCartQuantity() {
+  const cartQuantityShower = document.querySelector(".cart-quantity");
+
+  if (cartQuantityShower) {
+    cartQuantityShower.innerHTML = getCartQuantity();
+  }
+}
+
+document.querySelectorAll(".add-to-cart-button").forEach((button) => {
+  button.addEventListener("click", () => {
     const productId = button.dataset.productId;
 
-    const matchingProduct = products.find((product) => {
+    const product = products.find((product) => {
       return product.id === productId;
     });
 
-    cart.push(matchingProduct);
+    if (!product) {
+      console.log("Product not found:", productId);
+      return;
+    }
+
+    const existingItem = cart.find((cartItem) => {
+      return cartItem.productId === productId;
+    });
+
+    if (existingItem) {
+      existingItem.quantity++;
+    } else {
+      cart.push({
+        productId: productId,
+        quantity: 1,
+      });
+    }
+
+    saveCart();
+
+    updateCartQuantity();
 
     console.log(cart);
-    renderCart(matchingProduct)
   });
-
 });
 
-function renderCart (product) {
-  document.querySelector('.main').innerHTML += `
-          <div class="cart-item-container">
-            <div class="delivery-date">
-              Delivery date: Tuesday, June 21
-            </div>
+saveCart();
 
-            <div class="cart-item-details-grid">
-              <img class="product-image"
-                src="${product.image}">
-
-              <div class="cart-item-details">
-                <div class="product-name">
-                  ${product.name}
-                </div>
-                <div class="product-price">
-                  $${product.priceCents}
-                </div>
-                <div class="product-quantity">
-                  <span>
-                    Quantity: <span class="quantity-label">2</span>
-                  </span>
-                  <span class="update-quantity-link link-primary">
-                    Update
-                  </span>
-                  <span class="delete-quantity-link link-primary">
-                    Delete
-                  </span>
-                </div>
-              </div>
-
-              <div class="delivery-options">
-                <div class="delivery-options-title">
-                  Choose a delivery option:
-                </div>
-                <div class="delivery-option">
-                  <input type="radio" checked
-                    class="delivery-option-input"
-                    name="delivery-option-1">
-                  <div>
-                    <div class="delivery-option-date">
-                      Tuesday, June 21
-                    </div>
-                    <div class="delivery-option-price">
-                      FREE Shipping
-                    </div>
-                  </div>
-                </div>
-                <div class="delivery-option">
-                  <input type="radio"
-                    class="delivery-option-input"
-                    name="delivery-option-1">
-                  <div>
-                    <div class="delivery-option-date">
-                      Wednesday, June 15
-                    </div>
-                    <div class="delivery-option-price">
-                      $4.99 - Shipping
-                    </div>
-                  </div>
-                </div>
-                <div class="delivery-option">
-                  <input type="radio"
-                    class="delivery-option-input"
-                    name="delivery-option-1">
-                  <div>
-                    <div class="delivery-option-date">
-                      Monday, June 13
-                    </div>
-                    <div class="delivery-option-price">
-                      $9.99 - Shipping
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-`
-}
+updateCartQuantity();
