@@ -1,10 +1,10 @@
 import { products } from "./products.js";
 
 products.forEach((items) => {
-  console.log(document.querySelector('.products-grid').innerHTML += `<div class="product-container">
+  document.querySelector('.products-grid').innerHTML += `<div class="product-container">
           <div class="product-image-container">
             <img class="product-image"
-              src="images/products/athletic-cotton-socks-6-pairs.jpg">
+              src="${items.image}">
           </div>
 
           <div class="product-name limit-text-to-2-lines">
@@ -20,7 +20,7 @@ products.forEach((items) => {
           </div>
 
           <div class="product-price">
-            ${items.priceCents}
+            ${Math.round(items.priceCents)/100}
           </div>
 
           <div class="product-quantity-container">
@@ -45,8 +45,8 @@ products.forEach((items) => {
             Added
           </div>
 
-          <button class="add-to-cart-button button-primary">
+          <button class="add-to-cart-button button-primary" data-product-id="${items.id}">
             Add to Cart
           </button>
-        </div>`);
+        </div>`
 })
