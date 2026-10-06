@@ -17,7 +17,7 @@ const totalBeforeTax = document.querySelector(".total-before-tax");
 
 const taxPrice = document.querySelector(".tax-price");
 
-const orderTotal = document.querySelector(".order-total-price");
+const orderTotalPrice = document.querySelector(".order-total-price");
 
 const placeOrderButton = document.querySelector(".place-order-button");
 
@@ -32,87 +32,105 @@ function getCartQuantity() {
 }
 
 function getProductsPrice() {
-  let productsPrice = 0;
-
-  cart.forEach((cartItem) => {
+  return cart.reduce((total, cartItem) => {
     const product = products.find((product) => {
       return product.id === cartItem.productId;
     });
 
-    if (product) {
-      productsPrice += product.priceCents * cartItem.quantity;
+    if (!product) {
+      return total;
     }
-  });
 
-  return productsPrice;
+    return total + product.priceCents * cartItem.quantity;
+  }, 0);
 }
 
 function getShippingCost() {
-  let shipping = 0;
+  let shippingCents = 0;
 
-  document.querySelectorAll(".delivery-option-input").forEach((radio) => {
-    if (radio.checked) {
-      shipping += Number(radio.dataset.shipping);
-    }
+  document
+    .querySelectorAll(".delivery-option-input:checked")
+    .forEach((input) => {
+      shippingCents += Number(input.dataset.shipping);
+    });
+
+  return shippingCents;
+}
+
+function formatDate(date) {
+  return date.toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
   });
+}
 
-  return shipping;
+function getDeliveryDate(days) {
+  const date = new Date();
+
+  date.setDate(date.getDate() + days);
+
+  return formatDate(date);
+}
+
+function updateCheckoutHeader() {
+  checkoutItemsQuantity.innerHTML = getCartQuantity();
 }
 
 function updatePaymentSummary() {
   const productsPrice = getProductsPrice();
 
-  const shipping = getShippingCost();
+  const shippingCents = getShippingCost();
 
-  const beforeTax = productsPrice / 100 + shipping;
+  const totalBeforeTaxCents = productsPrice + shippingCents;
 
-  const tax = beforeTax * 0.1;
+  const taxCents = Math.round(totalBeforeTaxCents * 0.1);
 
-  const total = beforeTax + tax;
+  const orderTotalCents = totalBeforeTaxCents + taxCents;
 
-  const totalQuantity = getCartQuantity();
+  itemsPrice.innerHTML = `Items (${getCartQuantity()}):`;
 
-  if (checkoutItemsQuantity) {
-    checkoutItemsQuantity.innerHTML = totalQuantity;
-  }
+  itemsPriceValue.innerHTML = `$${(productsPrice / 100).toFixed(2)}`;
 
-  if (itemsPrice) {
-    itemsPrice.innerHTML = `Items (${totalQuantity}):`;
-  }
+  shippingPrice.innerHTML = `$${(shippingCents / 100).toFixed(2)}`;
 
-  if (itemsPriceValue) {
-    itemsPriceValue.innerHTML = `$${(productsPrice / 100).toFixed(2)}`;
-  }
+  totalBeforeTax.innerHTML = `$${(totalBeforeTaxCents / 100).toFixed(2)}`;
 
-  if (shippingPrice) {
-    shippingPrice.innerHTML = `$${shipping.toFixed(2)}`;
-  }
+  taxPrice.innerHTML = `$${(taxCents / 100).toFixed(2)}`;
 
-  if (totalBeforeTax) {
-    totalBeforeTax.innerHTML = `$${beforeTax.toFixed(2)}`;
-  }
-
-  if (taxPrice) {
-    taxPrice.innerHTML = `$${tax.toFixed(2)}`;
-  }
-
-  if (orderTotal) {
-    orderTotal.innerHTML = `$${total.toFixed(2)}`;
-  }
-
-  return {
-    productsPrice,
-    shipping,
-    beforeTax,
-    tax,
-    total,
-  };
+  orderTotalPrice.innerHTML = `$${(orderTotalCents / 100).toFixed(2)}`;
 }
 
 function renderCheckout() {
   orderSummary.innerHTML = "";
 
-  cart.forEach((cartItem, index) => {
+  if (cart.length === 0) {
+    orderSummary.innerHTML = `
+
+      <div class="empty-cart">
+
+        <div>
+          Your cart is empty.
+        </div>
+
+        <a
+          class="link-primary"
+          href="amazon.html"
+        >
+          Continue shopping
+        </a>
+
+      </div>
+
+    `;
+
+    updateCheckoutHeader();
+    updatePaymentSummary();
+
+    return;
+  }
+
+  cart.forEach((cartItem) => {
     const product = products.find((product) => {
       return product.id === cartItem.productId;
     });
@@ -121,15 +139,20 @@ function renderCheckout() {
       return;
     }
 
-    const quantity = cartItem.quantity;
-
     orderSummary.innerHTML += `
 
-      <div class="cart-item-container">
+      <div
+        class="cart-item-container"
+        data-product-id="${product.id}"
+      >
 
         <div class="delivery-date">
-          Delivery date: Tuesday, June 21
+
+          Delivery date:
+          ${getDeliveryDate(3)}
+
         </div>
+
 
         <div class="cart-item-details-grid">
 
@@ -138,39 +161,41 @@ function renderCheckout() {
             src="${product.image}"
           >
 
-          <div class="cart-item-details">
+
+          <div class="cart-item-info">
 
             <div class="product-name">
               ${product.name}
             </div>
 
+
             <div class="product-price">
               $${(product.priceCents / 100).toFixed(2)}
             </div>
 
+
             <div class="product-quantity">
 
-              <span>
-                Quantity:
-
-                <span class="quantity-label">
-                  ${quantity}
-                </span>
+              Quantity:
+              <span class="quantity-value">
+                ${cartItem.quantity}
               </span>
 
-              <span
+
+              <a
                 class="update-quantity-link link-primary"
-                data-product-index="${index}"
+                href="#"
               >
                 Update
-              </span>
+              </a>
 
-              <span
+
+              <a
                 class="delete-quantity-link link-primary"
-                data-product-index="${index}"
+                href="#"
               >
                 Delete
-              </span>
+              </a>
 
             </div>
 
@@ -184,20 +209,21 @@ function renderCheckout() {
             </div>
 
 
-            <div class="delivery-option">
+            <label class="delivery-option">
 
               <input
                 type="radio"
-                checked
                 class="delivery-option-input"
-                name="delivery-option-${index}"
+                name="delivery-${product.id}"
                 data-shipping="0"
+                checked
               >
+
 
               <div>
 
                 <div class="delivery-option-date">
-                  Tuesday, June 21
+                  ${getDeliveryDate(3)}
                 </div>
 
                 <div class="delivery-option-price">
@@ -206,22 +232,23 @@ function renderCheckout() {
 
               </div>
 
-            </div>
+            </label>
 
 
-            <div class="delivery-option">
+            <label class="delivery-option">
 
               <input
                 type="radio"
                 class="delivery-option-input"
-                name="delivery-option-${index}"
-                data-shipping="4.99"
+                name="delivery-${product.id}"
+                data-shipping="499"
               >
+
 
               <div>
 
                 <div class="delivery-option-date">
-                  Wednesday, June 15
+                  ${getDeliveryDate(2)}
                 </div>
 
                 <div class="delivery-option-price">
@@ -230,22 +257,23 @@ function renderCheckout() {
 
               </div>
 
-            </div>
+            </label>
 
 
-            <div class="delivery-option">
+            <label class="delivery-option">
 
               <input
                 type="radio"
                 class="delivery-option-input"
-                name="delivery-option-${index}"
-                data-shipping="9.99"
+                name="delivery-${product.id}"
+                data-shipping="999"
               >
+
 
               <div>
 
                 <div class="delivery-option-date">
-                  Monday, June 13
+                  ${getDeliveryDate(1)}
                 </div>
 
                 <div class="delivery-option-price">
@@ -254,7 +282,7 @@ function renderCheckout() {
 
               </div>
 
-            </div>
+            </label>
 
           </div>
 
@@ -264,6 +292,8 @@ function renderCheckout() {
 
     `;
   });
+
+  updateCheckoutHeader();
 
   updatePaymentSummary();
 
@@ -275,11 +305,21 @@ function renderCheckout() {
 }
 
 function addDeleteEvents() {
-  document.querySelectorAll(".delete-quantity-link").forEach((button) => {
-    button.addEventListener("click", () => {
-      const productIndex = Number(button.dataset.productIndex);
+  document.querySelectorAll(".delete-quantity-link").forEach((link) => {
+    link.addEventListener("click", (event) => {
+      event.preventDefault();
 
-      cart.splice(productIndex, 1);
+      const container = link.closest(".cart-item-container");
+
+      const productId = container.dataset.productId;
+
+      const cartIndex = cart.findIndex((cartItem) => {
+        return cartItem.productId === productId;
+      });
+
+      if (cartIndex !== -1) {
+        cart.splice(cartIndex, 1);
+      }
 
       saveCart();
 
@@ -289,61 +329,74 @@ function addDeleteEvents() {
 }
 
 function addUpdateEvents() {
-  document.querySelectorAll(".update-quantity-link").forEach((button) => {
-    button.addEventListener("click", () => {
-      const productIndex = Number(button.dataset.productIndex);
+  document.querySelectorAll(".update-quantity-link").forEach((link) => {
+    link.addEventListener("click", (event) => {
+      event.preventDefault();
 
-      const cartItem = cart[productIndex];
+      const container = link.closest(".cart-item-container");
 
-      const quantityLabel =
-        button.parentElement.querySelector(".quantity-label");
+      const productId = container.dataset.productId;
 
-      quantityLabel.innerHTML = `
+      const quantityElement = container.querySelector(".quantity-value");
 
-          <input
-            class="quantity-input"
-            type="number"
-            min="1"
-            value="${cartItem.quantity}"
-          >
+      const currentQuantity = Number(quantityElement.innerHTML);
 
-          <span
-            class="save-quantity-link link-primary"
-          >
-            Save
-          </span>
+      const newQuantity = prompt("Enter quantity:", currentQuantity);
 
-        `;
+      if (newQuantity === null) {
+        return;
+      }
 
-      button.style.display = "none";
+      const quantity = Number(newQuantity);
 
-      const input = quantityLabel.querySelector(".quantity-input");
+      if (!Number.isInteger(quantity) || quantity < 1 || quantity > 99) {
+        alert("Please enter a quantity between 1 and 99.");
 
-      const saveButton = quantityLabel.querySelector(".save-quantity-link");
+        return;
+      }
 
-      saveButton.addEventListener("click", () => {
-        const newQuantity = Number(input.value);
-
-        if (!Number.isInteger(newQuantity) || newQuantity < 1) {
-          return;
-        }
-
-        cartItem.quantity = newQuantity;
-
-        saveCart();
-
-        renderCheckout();
+      const cartItem = cart.find((item) => {
+        return item.productId === productId;
       });
+
+      if (cartItem) {
+        cartItem.quantity = quantity;
+      }
+
+      saveCart();
+
+      renderCheckout();
     });
   });
 }
 
 function addDeliveryEvents() {
-  document.querySelectorAll(".delivery-option-input").forEach((radio) => {
-    radio.addEventListener("change", () => {
+  document.querySelectorAll(".delivery-option-input").forEach((input) => {
+    input.addEventListener("change", () => {
       updatePaymentSummary();
     });
   });
+}
+
+function getSelectedDeliveryDate() {
+  const selectedOption = document.querySelector(
+    ".delivery-option-input:checked",
+  );
+
+  if (!selectedOption) {
+    return getDeliveryDate(3);
+  }
+
+  const deliveryOptions = selectedOption.closest(".cart-item-container");
+
+  const date = deliveryOptions.querySelector(".delivery-option-input:checked");
+
+  if (!date) {
+    return getDeliveryDate(3);
+  }
+
+  return date.closest(".delivery-option").querySelector(".delivery-option-date")
+    .innerHTML;
 }
 
 function placeOrder() {
@@ -353,32 +406,32 @@ function placeOrder() {
     return;
   }
 
-  const payment = updatePaymentSummary();
+  const productsPrice = getProductsPrice();
+
+  const shippingCents = getShippingCost();
+
+  const totalBeforeTaxCents = productsPrice + shippingCents;
+
+  const taxCents = Math.round(totalBeforeTaxCents * 0.1);
+
+  const orderTotalCents = totalBeforeTaxCents + taxCents;
+
+  const orders = JSON.parse(localStorage.getItem("orders")) || [];
 
   const orderId = Date.now().toString();
 
-  const today = new Date();
+  const orderDate = formatDate(new Date());
 
-  const orderDate = today.toLocaleDateString("en-US", {
-    month: "long",
-    day: "numeric",
-  });
-
-  const deliveryDate = new Date(today.getTime() + 4 * 24 * 60 * 60 * 1000);
-
-  const deliveryDateText = deliveryDate.toLocaleDateString("en-US", {
-    month: "long",
-    day: "numeric",
-  });
+  const deliveryDate = getSelectedDeliveryDate();
 
   const newOrder = {
     id: orderId,
 
     orderDate: orderDate,
 
-    deliveryDate: deliveryDateText,
+    deliveryDate: deliveryDate,
 
-    total: payment.total,
+    total: orderTotalCents / 100,
 
     products: cart.map((cartItem) => {
       return {
@@ -388,8 +441,6 @@ function placeOrder() {
       };
     }),
   };
-
-  const orders = JSON.parse(localStorage.getItem("orders")) || [];
 
   orders.unshift(newOrder);
 
@@ -402,8 +453,6 @@ function placeOrder() {
   window.location.href = "orders.html";
 }
 
-if (placeOrderButton) {
-  placeOrderButton.addEventListener("click", placeOrder);
-}
+placeOrderButton.addEventListener("click", placeOrder);
 
 renderCheckout();

@@ -1,220 +1,221 @@
 .main {
-  max-width: 850px;
+  max-width: 1100px;
+
   margin-top: 90px;
   margin-bottom: 100px;
-  padding-left: 20px;
-  padding-right: 20px;
 
-  /* margin-left: auto;
-     margin-right auto;
-     Is a trick for centering an element horizontally
-     without needing a container. */
+  padding-left: 30px;
+  padding-right: 30px;
+
   margin-left: auto;
   margin-right: auto;
 }
 
 .page-title {
-  font-weight: 700;
   font-size: 26px;
+  font-weight: 700;
+
   margin-bottom: 25px;
 }
 
 .orders-grid {
   display: grid;
-  grid-template-columns: 1fr;
-  row-gap: 50px;
+  row-gap: 20px;
+}
+
+.order-container {
+  border: 1px solid rgb(222, 222, 222);
+  border-radius: 8px;
+
+  overflow: hidden;
 }
 
 .order-header {
-  background-color: rgb(240, 242, 242);
-  border: 1px solid rgb(213, 217, 217);
+  background-color: rgb(245, 245, 245);
+
+  border-bottom: 1px solid rgb(222, 222, 222);
+
+  padding: 20px 25px;
 
   display: flex;
   align-items: center;
   justify-content: space-between;
 
-  padding: 20px 25px;
-  border-top-left-radius: 8px;
-  border-top-right-radius: 8px;
+  column-gap: 40px;
 }
 
 .order-header-left-section {
   display: flex;
-  flex-shrink: 0;
+  flex-direction: column;
+
+  row-gap: 4px;
+
+  font-size: 15px;
 }
 
 .order-header-label {
   font-weight: 500;
 }
 
-.order-date,
-.order-total {
-  margin-right: 45px;
-}
-
 .order-header-right-section {
-  flex-shrink: 1;
+  margin-left: auto;
+
+  text-align: right;
+
+  font-size: 15px;
 }
 
-@media (max-width: 575px) {
-  .order-header {
-    flex-direction: column;
-    align-items: start;
-    line-height: 23px;
-    padding: 15px;
-  }
+.order-header-right-section a {
+  color: rgb(0, 113, 133);
 
-  .order-header-left-section {
-    flex-direction: column;
-  }
+  text-decoration: none;
+}
 
-  .order-header-label {
-    margin-right: 5px;
-  }
-
-  .order-date,
-  .order-total {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    margin-right: 0;
-  }
-
-  .order-header-right-section {
-    display: grid;
-    grid-template-columns: auto 1fr;
-  }
+.order-header-right-section a:hover {
+  text-decoration: underline;
 }
 
 .order-details-grid {
   padding: 40px 25px;
-  border: 1px solid rgb(213, 217, 217);
-  border-top: none;
-  border-bottom-left-radius: 8px;
-  border-bottom-right-radius: 8px;
 
   display: grid;
-  grid-template-columns: 110px 1fr 220px;
-  column-gap: 35px;
-  row-gap: 60px;
+  grid-template-columns: 150px 1fr 200px;
+
+  column-gap: 30px;
+
   align-items: center;
 }
 
-@media (max-width: 800px) {
-  .order-details-grid {
-    grid-template-columns: 110px 1fr;
-    row-gap: 0;
-    padding-bottom: 8px;
-  }
-}
-
-@media (max-width: 450px) {
-  .order-details-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
 .product-image-container {
-  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-.product-image-container img {
-  max-width: 110px;
-  max-height: 110px;
+.product-image {
+  max-width: 150px;
+  max-height: 150px;
+}
+
+.product-details {
+  min-width: 0;
 }
 
 .product-name {
   font-weight: 700;
-  margin-bottom: 5px;
-}
 
-.product-delivery-date {
-  margin-bottom: 3px;
-}
-
-.product-quantity {
   margin-bottom: 8px;
 }
 
-.buy-again-button {
-  font-size: 15px;
-  width: 140px;
-  height: 36px;
-  border-radius: 8px;
+.product-delivery-date {
+  color: rgb(0, 118, 0);
 
+  font-weight: 500;
+
+  margin-bottom: 8px;
+}
+
+.product-quantity {
+  margin-bottom: 12px;
+}
+
+.buy-again-button {
   display: flex;
   align-items: center;
   justify-content: center;
+
+  column-gap: 8px;
+
+  padding: 8px 15px;
+
+  border-radius: 8px;
 }
 
-.buy-again-icon {
+.buy-again-button img {
   width: 25px;
-  margin-right: 15px;
+  height: 25px;
 }
 
 .product-actions {
-  align-self: start;
+  display: flex;
+  justify-content: flex-end;
 }
 
 .track-package-button {
   width: 100%;
-  font-size: 15px;
-  padding: 8px;
+
+  padding-top: 10px;
+  padding-bottom: 10px;
+
+  border-radius: 8px;
 }
 
 @media (max-width: 800px) {
-  .buy-again-button {
-    margin-bottom: 10px;
+  .order-header {
+    flex-wrap: wrap;
+
+    row-gap: 15px;
+  }
+
+  .order-header-right-section {
+    width: 100%;
+
+    margin-left: 0;
+
+    text-align: left;
+  }
+
+  .order-details-grid {
+    grid-template-columns: 120px 1fr;
+
+    row-gap: 30px;
+
+    padding: 30px 20px;
+  }
+
+  .product-image {
+    max-width: 120px;
+    max-height: 120px;
   }
 
   .product-actions {
-    /* grid-column: 2 means this element will be placed
-       in column 2 in the grid. (Normally, the column that
-       an element is placed in is determined by the order
-       of the elements in the HTML. grid-column overrides
-       this default ordering). */
-    grid-column: 2;
-    margin-bottom: 30px;
+    grid-column: 1 / span 2;
+
+    justify-content: flex-start;
   }
 
   .track-package-button {
-    width: 140px;
+    width: 200px;
   }
 }
 
-@media (max-width: 450px) {
+@media (max-width: 500px) {
+  .main {
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+
+  .order-header {
+    padding: 15px;
+  }
+
+  .order-details-grid {
+    grid-template-columns: 1fr;
+
+    text-align: left;
+
+    padding: 25px 15px;
+  }
+
   .product-image-container {
-    text-align: center;
-    margin-bottom: 25px;
-  }
-
-  .product-image-container img {
-    max-width: 150px;
-    max-height: 150px;
-  }
-
-  .product-name {
-    margin-bottom: 10px;
-  }
-
-  .product-quantity {
-    margin-bottom: 15px;
-  }
-
-  .buy-again-button {
-    width: 100%;
-    margin-bottom: 15px;
+    justify-content: flex-start;
   }
 
   .product-actions {
-    /* grid-column: auto; undos grid-column: 2; from above.
-       This element will now be placed in its normal column
-       in the grid. */
     grid-column: auto;
-    margin-bottom: 70px;
   }
 
   .track-package-button {
     width: 100%;
-    padding: 12px;
   }
 }

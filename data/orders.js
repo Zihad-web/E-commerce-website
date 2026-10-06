@@ -71,7 +71,7 @@ function renderOrders() {
 
             <div class="product-image-container">
 
-              <img
+              <img class="product-image"
                 src="${product.image}"
               >
 
